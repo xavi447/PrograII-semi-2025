@@ -5,7 +5,7 @@ import android.view.View;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
-
+import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -36,20 +36,24 @@ public class MainActivity extends AppCompatActivity {
                 double num2 = Double.parseDouble(tempVal.getText().toString());
 
                 double respuesta = 0.0;
-
+                String msg = "";
                 spn = findViewById(R.id.spnOpciones);
                 switch (spn.getSelectedItemPosition()){
                     case 0:
                         respuesta = num1 + num2;
+                        msg = "La suma es: "+ respuesta;
                         break;
                     case 1:
                         respuesta = num1 - num2;
+                        msg = "La resta es: "+ respuesta;
                         break;
                     case 2:
                         respuesta = num1 * num2;
+                        msg = "La multiplicacion es: "+ respuesta;
                         break;
                     case 3:
                         respuesta = num1 / num2;
+                        msg = "La division es: "+ respuesta;
                         break;
                 }
                 tempVal = findViewById(R.id.lblRespuesta);
