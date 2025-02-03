@@ -14,10 +14,6 @@ public class MainActivity extends AppCompatActivity {
     Button btn;
     TextView tempVal;
 
-
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
