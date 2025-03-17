@@ -1,82 +1,98 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <!-- Campo para el nombre del producto -->
     <EditText
         android:id="@+id/txtNombre"
-        android:hint="Nombre"
-        android:layout_marginTop="40dp"
+        android:hint="Nombre del producto"
+        android:layout_marginTop="20dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+
+    <!-- Campo para la marca del producto -->
     <EditText
-        android:id="@+id/txtDireccion"
-        android:hint="Direccion"
+        android:id="@+id/txtMarca"
+        android:hint="Marca"
         android:layout_below="@id/txtNombre"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <!-- Campo para el código del producto -->
+    <EditText
+        android:id="@+id/txtCodigo"
+        android:hint="Código"
+        android:layout_below="@id/txtMarca"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <!-- Campo para la descripción del producto -->
+    <EditText
+        android:id="@+id/txtDescripcion"
+        android:hint="Descripción"
+        android:layout_below="@id/txtCodigo"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <!-- Campo para el precio del producto -->
+    <EditText
+        android:id="@+id/txtPrecio"
+        android:hint="Precio"
+        android:layout_below="@id/txtDescripcion"
+        android:layout_marginTop="20dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
     <EditText
-        android:id="@+id/txtTelefono"
-        android:hint="Telefono"
-        android:layout_below="@id/txtDireccion"
-        android:layout_marginTop="40dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
+        android:id="@+id/txtPresentacion"
+        android:hint="Presentación"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-    <EditText
-        android:id="@+id/txtEmail"
-        android:hint="Email"
-        android:layout_below="@id/txtTelefono"
-        android:layout_marginTop="40dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtDescripcion"
+        android:layout_marginTop="60dp"
         android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-    <EditText
-        android:id="@+id/txtDui"
-        android:hint="Dui"
-        android:layout_below="@id/txtEmail"
-        android:layout_marginTop="40dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_marginRight="20dp"/>
+
+    <!-- Imagen del producto -->
     <ImageButton
-        android:id="@+id/imgFotoAmigo"
-        android:layout_below="@id/txtDui"
-        android:layout_marginTop="40dp"
+        android:id="@+id/imgFotoProducto"
+        android:layout_below="@id/txtPrecio"
+        android:layout_marginTop="20dp"
         android:layout_centerHorizontal="true"
         android:src="@mipmap/ic_launcher_round"
         android:layout_width="100dp"
         android:layout_height="100dp"/>
+
+    <!-- Botón para guardar el producto -->
     <Button
-        android:id="@+id/btnGuardarAmigo"
-        android:text="Guardar Amigo"
-        android:layout_below="@id/imgFotoAmigo"
-        android:layout_marginTop="40dp"
+        android:id="@+id/btnGuardarProducto"
+        android:text="Guardar Producto"
+        android:layout_below="@id/imgFotoProducto"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabListaAmigos"
+        android:id="@+id/fabListaProductos"
         android:src="@android:drawable/ic_menu_revert"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="20dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
-
-
-
 </RelativeLayout>
-
