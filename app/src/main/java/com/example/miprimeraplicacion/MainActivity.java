@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Configurar el botón flotante para regresar a la lista de productos
         fabListaProductos.setOnClickListener(view -> abrirListaProductos());
+
     }
 
     private void tomarFoto() {

@@ -57,21 +57,23 @@
         android:layout_marginRight="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+
+    <!-- Imagen del producto -->
+
     <EditText
         android:id="@+id/txtPresentacion"
-        android:hint="Presentación"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/txtDescripcion"
-        android:layout_marginTop="60dp"
         android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"/>
+        android:layout_marginTop="70dp"
+        android:layout_marginRight="20dp"
+        android:hint="Presentación" />
 
-    <!-- Imagen del producto -->
     <ImageButton
         android:id="@+id/imgFotoProducto"
         android:layout_below="@id/txtPrecio"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="80dp"
         android:layout_centerHorizontal="true"
         android:src="@mipmap/ic_launcher_round"
         android:layout_width="100dp"
@@ -80,13 +82,14 @@
     <!-- Botón para guardar el producto -->
     <Button
         android:id="@+id/btnGuardarProducto"
-        android:text="Guardar Producto"
-        android:layout_below="@id/imgFotoProducto"
-        android:layout_marginTop="20dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_below="@id/imgFotoProducto"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="68dp"
+        android:layout_marginRight="20dp"
+        android:text="Guardar Producto" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabListaProductos"
         android:src="@android:drawable/ic_menu_revert"

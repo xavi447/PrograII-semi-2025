@@ -56,7 +56,7 @@ public class DB extends SQLiteOpenHelper {
             switch (accion) {
                 case "nuevo":
                     sql = "INSERT INTO productos (codigo, nombre, marca, descripcion, presentacion, precio, urlFoto) " +
-                            "VALUES ('" + datos[1] + "', '" + datos[2] + "', '" + datos[3] + "', '" + datos[4] + "', '" + datos[5] + "', " + datos[6] + ", '" + datos[7] + "')";
+                            "VALUES ('" + datos[1] + "', '" + datos[2] + "', '" + datos[4] + "', '" + datos[3] + "', '" + datos[5] + "', " + datos[6] + ", '" + datos[7] + "')";
                     break;
                 case "modificar":
                     sql = "UPDATE productos SET " +
@@ -100,9 +100,23 @@ public class DB extends SQLiteOpenHelper {
      */
     public Cursor buscar_productos(String query) {
         SQLiteDatabase db = getReadableDatabase();
-        return db.rawQuery(
-                "SELECT * FROM productos WHERE codigo LIKE ? OR descripcion LIKE ?",
-                new String[]{"%" + query + "%", "%" + query + "%"}
-        );
+
+        // Se asegura que el query no esté vacío y se realiza la búsqueda en todos los campos
+        if (query == null || query.trim().isEmpty()) {
+            return db.rawQuery("SELECT * FROM productos", null); // Si no hay búsqueda, traer todos los productos
+        }
+
+        // Usar LIKE para buscar en todos los campos: código, nombre, marca, descripción, presentación, precio
+        String sql = "SELECT * FROM productos WHERE codigo LIKE ? OR nombre LIKE ? OR marca LIKE ? OR descripcion LIKE ? OR presentacion LIKE ? OR precio LIKE ?";
+        String[] selectionArgs = new String[]{
+                "%" + query + "%",
+                "%" + query + "%",
+                "%" + query + "%",
+                "%" + query + "%",
+                "%" + query + "%",
+                "%" + query + "%"
+        };
+
+        return db.rawQuery(sql, selectionArgs);
     }
 }

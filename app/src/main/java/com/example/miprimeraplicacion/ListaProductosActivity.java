@@ -1,6 +1,5 @@
 package com.example.miprimeraplicacion;
 
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -27,15 +26,12 @@ import java.util.ArrayList;
 public class ListaProductosActivity extends Activity {
     Bundle parametros = new Bundle();
     ListView ltsProductos;
-    Cursor cProductos;
     DB db;
     final ArrayList<Producto> alProductos = new ArrayList<>();
     final ArrayList<Producto> alProductosCopia = new ArrayList<>();
     JSONArray jsonArray;
     JSONObject jsonObject;
-    Producto miProducto;
     FloatingActionButton fab;
-
     int posicion = 0;
 
     @Override
@@ -93,7 +89,7 @@ public class ListaProductosActivity extends Activity {
                 try {
                     String respuesta = db.administrar_productos("eliminar", new String[]{jsonArray.getJSONObject(posicion).getString("idProducto")});
                     if (respuesta.equals("ok")) {
-                        obtenerDatosProductos();
+                        obtenerDatosProductos();  // Recargar los productos después de eliminar
                         mostrarMsg("Producto eliminado con éxito");
                     } else {
                         mostrarMsg("Error: " + respuesta);
@@ -116,20 +112,19 @@ public class ListaProductosActivity extends Activity {
     }
 
     private void obtenerDatosProductos() {
-        try {
-            Cursor cursor = db.lista_productos();
+        try (Cursor cursor = db.lista_productos()) {
             if (cursor.moveToFirst()) {
                 jsonArray = new JSONArray();
                 do {
                     jsonObject = new JSONObject();
-                    jsonObject.put("idProducto", cursor.getString(0)); // idProducto
-                    jsonObject.put("codigo", cursor.getString(1));     // codigo
-                    jsonObject.put("nombre", cursor.getString(2));     // nombre
-                    jsonObject.put("marca", cursor.getString(3));      // marca
-                    jsonObject.put("descripcion", cursor.getString(4));// descripcion
-                    jsonObject.put("presentacion", cursor.getString(5)); // presentacion
-                    jsonObject.put("precio", cursor.getDouble(6));     // precio
-                    jsonObject.put("foto", cursor.getString(7));       // foto
+                    jsonObject.put("idProducto", cursor.getString(0));
+                    jsonObject.put("codigo", cursor.getString(1));
+                    jsonObject.put("nombre", cursor.getString(2));
+                    jsonObject.put("marca", cursor.getString(3));
+                    jsonObject.put("descripcion", cursor.getString(4));
+                    jsonObject.put("presentacion", cursor.getString(5));
+                    jsonObject.put("precio", cursor.getDouble(6));
+                    jsonObject.put("foto", cursor.getString(7));
                     jsonArray.put(jsonObject);
                 } while (cursor.moveToNext());
                 mostrarDatosProductos();
@@ -182,18 +177,17 @@ public class ListaProductosActivity extends Activity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 alProductos.clear();
-                String buscar = tempVal.getText().toString().trim().toLowerCase();
-                if (buscar.length() <= 0) {
+                String buscar = s.toString().trim().toLowerCase();
+                if (buscar.isEmpty()) {
                     alProductos.addAll(alProductosCopia);
                 } else {
                     for (Producto item : alProductosCopia) {
-                        if (item.getDescripcion().toLowerCase().contains(buscar) ||
-                                item.getCodigo().toLowerCase().contains(buscar)) {
+                        if (item.getDescripcion().toLowerCase().contains(buscar) || item.getCodigo().toLowerCase().contains(buscar)) {
                             alProductos.add(item);
                         }
                     }
-                    ltsProductos.setAdapter(new AdaptadorProductos(getApplicationContext(), alProductos));
                 }
+                ((AdaptadorProductos) ltsProductos.getAdapter()).notifyDataSetChanged();
             }
 
             @Override
@@ -205,3 +199,5 @@ public class ListaProductosActivity extends Activity {
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
     }
 }
+
+

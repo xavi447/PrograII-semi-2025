@@ -8,9 +8,10 @@ public class Producto {
     double precio;
     String foto;
     String nombre;
-    public Producto(String idProducto, String codigo, String descripcion, String marca, String presentacion, String string, double precio, String foto) {
+    public Producto(String idProducto, String codigo, String nombre, String descripcion, String marca, String presentacion, double precio, String foto) {
         this.idProducto = idProducto;
         this.codigo = codigo;
+        this.nombre = nombre; // Asegurar que se asigne
         this.descripcion = descripcion;
         this.marca = marca;
         this.presentacion = presentacion;
