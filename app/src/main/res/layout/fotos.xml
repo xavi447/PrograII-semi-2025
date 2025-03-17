@@ -21,7 +21,7 @@
         android:id="@+id/lblNombreAdaptador"
         android:layout_marginTop="10dp"
         android:layout_marginLeft="80dp"
-        android:text="Juan Perez"
+        android:text="Leo Messi"
         android:textColor="@color/black"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
@@ -29,7 +29,7 @@
         android:id="@+id/lblTelefonoAdaptador"
         android:layout_marginTop="30dp"
         android:layout_marginLeft="80dp"
-        android:text="2626-1212"
+        android:text="911"
         android:textColor="@color/black"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
@@ -37,7 +37,7 @@
         android:id="@+id/lblEmailAdaptador"
         android:layout_marginTop="30dp"
         android:layout_marginLeft="200dp"
-        android:text="juan@gmail.com"
+        android:text="Messi@gmail.com"
         android:textColor="@color/black"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>

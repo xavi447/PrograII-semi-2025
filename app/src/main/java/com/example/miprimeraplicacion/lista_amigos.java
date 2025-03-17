@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -14,6 +15,11 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.ContextMenu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,6 +36,12 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import android.view.ContextMenu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import androidx.annotation.NonNull;
 public class lista_amigos extends Activity{
     Bundle parametros = new Bundle();
     ListView ltsAmigos;
@@ -41,19 +53,57 @@ public class lista_amigos extends Activity{
     JSONObject jsonObject;
     amigos misAmigos;
     FloatingActionButton fab;
+
+    int posicion =0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_amigos);
         db = new DB(this);
-
+        parametros.putString("accion","nuevo");
         fab = findViewById(R.id.fabAgregarAmigo);
         fab.setOnClickListener(view -> abriVentana());
         obtenerDatosAmigos();
         buscarAmigos();
     }
+
+
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.mimenu, menu);
+        try {
+            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+            posicion = info.position;
+            menu.setHeaderTitle(jsonArray.getJSONObject(posicion).getString("nombre"));
+        } catch (Exception e) {
+            mostrarMsg("Error: " + e.getMessage());
+        }
+    }
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        try{
+            if( item.getItemId()==R.id.mnxNuevo){
+                abriVentana();
+            }else if( item.getItemId()==R.id.mnxModificar){
+                parametros.putString("accion", "modificar");
+                parametros.putString("amigos", jsonArray.getJSONObject(posicion).toString());
+                abriVentana();
+            } else if (item.getItemId()==R.id.mnxEliminar) {
+                // Eliminar amigo
+            }
+            return true;
+        }catch (Exception e){
+            mostrarMsg("Error: " + e.getMessage());
+            return super.onContextItemSelected(item);
+        }
+    }
+
     private void abriVentana(){
         Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtras(parametros);
         startActivity(intent);
     }
     private void obtenerDatosAmigos(){
