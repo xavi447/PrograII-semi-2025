@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal">
+
+        <ImageView
+            android:id="@+id/logoPrincipal"
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:src="@drawable/logo_pnc"
+            android:layout_marginTop="60dp"
+            android:layout_marginBottom="32dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sistema de Multas"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#002D72"
+            android:layout_gravity="center"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Seleccione el tipo de acceso"
+            android:textSize="16sp"
+            android:textColor="#6E6E6E"
+            android:layout_marginBottom="32dp"
+            android:layout_gravity="center" />
+
+        <!-- Botón para Usuario -->
+        <Button
+            android:id="@+id/btnAccesoUsuario"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ingresar como Usuario"
+            android:backgroundTint="#002D72"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"
+            android:padding="14dp" />
+
+        <!-- Botón para Agente de Policía -->
+        <Button
+            android:id="@+id/btnAccesoPolicia"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ingresar como Agente de Policía"
+            android:backgroundTint="#002D72"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:padding="14dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tu seguridad, nuestro compromiso"
+            android:textColor="#6E6E6E"
+            android:textSize="14sp"
+            android:layout_gravity="center"
+            android:layout_marginTop="48dp" />
+
+    </LinearLayout>
+</ScrollView>

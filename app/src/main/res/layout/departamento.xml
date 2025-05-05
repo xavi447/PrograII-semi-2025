@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:fillViewport="true"
+    tools:context=".DepartamentoActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Título principal (mantenido exactamente igual) -->
+        <TextView
+            android:id="@+id/titleTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="DEPARTAMENTOS"
+            android:textColor="#FFFFFF"
+            android:background="#002D72"
+            android:padding="12dp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Sección de selección (mantenido exactamente igual) -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SELECCIONE UN DEPARTAMENTO"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#002D72"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Grupo de radio buttons (mantenido exactamente igual) -->
+        <RadioGroup
+            android:id="@+id/radioGroupDepartamentos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp">
+
+            <RadioButton
+                android:id="@+id/radioAhuachapan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ahuachapán"
+                android:textColor="#002D72"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioButton
+                android:id="@+id/radioSantaAna"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Santa Ana"
+                android:textColor="#002D72"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioButton
+                android:id="@+id/radioSonsonate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sonsonate"
+                android:textColor="#002D72"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioButton
+                android:id="@+id/radioChalatenango"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chalatenango"
+                android:textColor="#002D72"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioButton
+                android:id="@+id/radioLaLibertad"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="La Libertad"
+                android:textColor="#002D72"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioButton
+                android:id="@+id/radioSanSalvador"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="San Salvador"
+                android:textColor="#002D72"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioButton
+                android:id="@+id/radioCuscatlan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cuscatlán"
+                android:textColor="#002D72"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioButton
+                android:id="@+id/radioLaPaz"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="La Paz"
+                android:textColor="#002D72"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioButton
+                android:id="@+id/radioCabanas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cabañas"
+                android:textColor="#002D72"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioButton
+                android:id="@+id/radioSanVicente"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="San Vicente"
+                android:textColor="#002D72"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioButton
+                android:id="@+id/radioUsulutan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Usulután"
+                android:textColor="#002D72"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioButton
+                android:id="@+id/radioSanMiguel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="San Miguel"
+                android:textColor="#002D72"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioButton
+                android:id="@+id/radioMorazan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Morazán"
+                android:textColor="#002D72"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioButton
+                android:id="@+id/radioLaUnion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="La Unión"
+                android:textColor="#002D72"/>
+        </RadioGroup>
+
+        <!-- Botón "Guardar Multa" AÑADIDO (conservando el mismo estilo de tu diseño) -->
+        <Button
+            android:id="@+id/btnGuardarMulta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Guardar Multa"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#002D72"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:paddingVertical="6dp"
+            android:paddingHorizontal="12dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"/>
+    </LinearLayout>
+</ScrollView>

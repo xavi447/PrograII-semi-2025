@@ -1,15 +1,5 @@
 <resources>
-    <string name="app_name">MiPrimerAplicacion</string>
+    <string name="app_name">Agenda</string>
     <string name="hola">Hola Mundo</string>
-    <string-array name="opciones">
-        <item>Suma</item>
-        <item>Resta</item>
-        <item>Multiplicacion</item>
-        <item>Division</item>
-        <item>Factorial</item>
-        <item>Porcentaje</item>
-        <item>Exponenciacion</item>
-        <item>raiz</item>
-        <item>modulo</item>
-    </string-array>
+
 </resources>
