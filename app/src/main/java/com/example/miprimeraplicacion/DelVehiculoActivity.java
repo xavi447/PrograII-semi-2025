@@ -18,7 +18,9 @@ public class DelVehiculoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Navegación simple a la pantalla de Decomisos
-                startActivity(new Intent(DelVehiculoActivity.this, DecomisosAutoridadActivity.class));
+                Intent intent = new Intent(DelVehiculoActivity.this, falta.class);
+                intent.putExtra("usuario_logueado", getIntent().getStringExtra("usuario_logueado"));
+                startActivity(intent);
             }
         });
     }

@@ -37,7 +37,7 @@ public class MultasActivity extends AppCompatActivity {
 
         // 3. Configurar botón Siguiente
         btnSiguiente.setOnClickListener(v -> {
-            startActivity(new Intent(MultasActivity.this, DepartamentoActivity.class));
+            startActivity(new Intent(MultasActivity.this, UbicacionActivity.class));
         });
     }
 

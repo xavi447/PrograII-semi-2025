@@ -18,7 +18,9 @@ public class DelConductorActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Navegación simple sin validaciones
-                startActivity(new Intent(DelConductorActivity.this, DelVehiculoActivity.class));
+                Intent intent = new Intent(DelConductorActivity.this, DelVehiculoActivity.class);
+                intent.putExtra("usuario_logueado", getIntent().getStringExtra("usuario_logueado"));
+                startActivity(intent);
             }
         });
     }

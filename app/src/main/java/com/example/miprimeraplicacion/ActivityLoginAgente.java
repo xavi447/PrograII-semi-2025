@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 public class ActivityLoginAgente extends AppCompatActivity {
@@ -36,7 +37,7 @@ public class ActivityLoginAgente extends AppCompatActivity {
                 mostrarMensaje("Ingrese usuario y contraseña");
             } else {
                 if (dbAgentes.verificarAgente(usuario, contrasena)) {
-                    iniciarAplicacion();
+                    iniciarAplicacion(usuario);  // Pasamos el usuario
                 } else {
                     mostrarMensaje("Credenciales incorrectas");
                 }
@@ -47,8 +48,12 @@ public class ActivityLoginAgente extends AppCompatActivity {
         btnRegresar.setOnClickListener(v -> finish());
     }
 
-    private void iniciarAplicacion() {
-        startActivity(new Intent(this, DelConductorActivity.class));
+    // Método para iniciar la aplicación y enviar el nombre del usuario
+    private void iniciarAplicacion(String usuario) {
+        Intent intent = new Intent(this, DelConductorActivity.class);
+
+        intent.putExtra("usuario_logueado", usuario); // Enviamos el usuario
+        startActivity(intent);
         finish();
     }
 
@@ -62,3 +67,4 @@ public class ActivityLoginAgente extends AppCompatActivity {
         super.onDestroy();
     }
 }
+

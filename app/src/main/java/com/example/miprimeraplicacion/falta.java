@@ -4,9 +4,7 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,7 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class DecomisosAutoridadActivity extends AppCompatActivity {
+public class falta extends AppCompatActivity {
 
     private EditText etFechaDecomiso;
     private Calendar calendar = Calendar.getInstance();
@@ -46,9 +44,11 @@ public class DecomisosAutoridadActivity extends AppCompatActivity {
 
         // Configurar el botón Siguiente
         Button btnSiguiente = findViewById(R.id.btnSiguiente);
-        btnSiguiente.setOnClickListener(v ->
-                startActivity(new Intent(DecomisosAutoridadActivity.this, DecomisosAutoridadOtrosActivity.class))
-        );
+        btnSiguiente.setOnClickListener(v -> {
+            Intent intent = new Intent(falta.this, DecomisosAutoridadOtrosActivity.class);
+            intent.putExtra("usuario_logueado", getIntent().getStringExtra("usuario_logueado"));
+            startActivity(intent);
+        });
     }
 
     private void setupDatePicker() {
