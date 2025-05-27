@@ -1,3 +1,4 @@
+package com.example.miprimeraplicacion;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
@@ -29,7 +30,7 @@ public class UbicacionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ubicacion);
+        setContentView(R.layout.departamento);
 
         tvUbicacion = findViewById(R.id.tvUbicacion);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
