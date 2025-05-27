@@ -79,27 +79,33 @@
             android:orientation="horizontal"
             android:layout_marginBottom="16dp">
 
-            <EditText
+            <Spinner
+                android:id="@+id/spinnerTipoPlaca"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Ej: MB"
                 android:background="@drawable/edit_text_bg"
                 android:padding="12dp"
-                android:textColor="#002D72"
-                android:textColorHint="#6E6E6E"/>
+                android:spinnerMode="dropdown"
+                android:layout_marginEnd="4dp"/>
+
 
             <EditText
+                android:id="@+id/editTextNumeroPlaca"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:hint="Ej: 7135"
                 android:background="@drawable/edit_text_bg"
                 android:padding="12dp"
+                android:inputType="text"
+                android:maxLength="7"
                 android:textColor="#002D72"
                 android:textColorHint="#6E6E6E"/>
 
+
             <EditText
+                android:id="@+id/editTextCodigoRuta"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -107,7 +113,10 @@
                 android:background="@drawable/edit_text_bg"
                 android:padding="12dp"
                 android:textColor="#002D72"
-                android:textColorHint="#6E6E6E"/>
+                android:textColorHint="#6E6E6E"
+                android:maxLength="10"
+                />
+
         </LinearLayout>
 
         <!-- CheckBox Placa Extranjera -->
@@ -195,6 +204,7 @@
 
         <!-- Color -->
         <TextView
+
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="COLOR"
@@ -204,6 +214,7 @@
             android:layout_marginBottom="4dp"/>
 
         <EditText
+            android:id="@+id/txtColor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Ej: Rojo, Azul"
