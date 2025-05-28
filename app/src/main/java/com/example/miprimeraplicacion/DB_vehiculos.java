@@ -74,6 +74,11 @@ public class DB_vehiculos extends SQLiteOpenHelper {
     // Método para buscar por numero_placa
     public Cursor buscarPorPlaca(String numeroPlaca) {
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.query("vehiculos", null, "numero_placa = ?", new String[]{numeroPlaca}, null, null, null);
+        // Convertir entrada a mayúsculas
+        String placaUpper = numeroPlaca.toUpperCase();
+        // La consulta convierte a mayúsculas la columna para comparar
+        String query = "SELECT * FROM vehiculos WHERE UPPER(numero_placa) = ?";
+        return db.rawQuery(query, new String[]{placaUpper});
     }
+
 }

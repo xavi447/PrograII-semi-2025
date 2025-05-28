@@ -24,7 +24,7 @@
             android:gravity="center"
             android:layout_marginBottom="24dp" />
 
-        <!-- Campo: Código de la falta -->
+        <!-- Código de la falta -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -46,7 +46,7 @@
             android:textColorHint="#6E6E6E"
             android:layout_marginBottom="16dp" />
 
-        <!-- Sección: Clasificación -->
+        <!-- Clasificación -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -56,7 +56,6 @@
             android:textColor="#002D72"
             android:layout_marginBottom="8dp" />
 
-        <!-- Grupo de radio buttons para clasificación -->
         <RadioGroup
             android:id="@+id/radioGroupClasificacion"
             android:layout_width="match_parent"
@@ -124,6 +123,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:timePickerMode="spinner"
+            android:theme="@style/Theme.AppCompat.Light.Dialog"
             android:layout_marginBottom="16dp" />
 
         <!-- Observaciones -->
@@ -140,7 +140,7 @@
             android:textColorHint="#6E6E6E"
             android:layout_marginBottom="32dp" />
 
-        <!-- Sección de Evidencia (Cámara) -->
+        <!-- Evidencia -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -157,7 +157,7 @@
             android:gravity="center_vertical"
             android:background="@drawable/edit_text_bg"
             android:padding="12dp"
-            android:layout_marginBottom="32dp">
+            android:layout_marginBottom="8dp">
 
             <ImageView
                 android:id="@+id/imgEvidencia"
@@ -175,6 +175,15 @@
                 android:textColor="#002D72"
                 android:paddingStart="12dp" />
         </LinearLayout>
+
+        <!-- Aquí el contenedor horizontal para las fotos tomadas -->
+        <LinearLayout
+            android:id="@+id/layoutFotos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="32dp" />
 
         <!-- Botón Siguiente -->
         <Button

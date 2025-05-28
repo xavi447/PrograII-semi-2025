@@ -16,6 +16,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.provider.MediaStore;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -28,16 +29,18 @@ public class falta extends AppCompatActivity {
     private static final int REQUEST_CAMERA_PERMISSION = 100;
     private static final int REQUEST_IMAGE_CAPTURE = 101;
 
-    private ImageView imgEvidencia;
+    private ImageView imgEvidencia; // Este será el botón para abrir cámara
+    private LinearLayout layoutFotos; // Contenedor donde aparecerán las fotos
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.falta);
 
-        // Configuración del TimePicker
         TimePicker timePicker = findViewById(R.id.timePickerDecomiso);
         etFechaDecomiso = findViewById(R.id.etFechaDecomiso);
+        imgEvidencia = findViewById(R.id.imgEvidencia);
+        layoutFotos = findViewById(R.id.layoutFotos);
 
         // Establecer hora actual por defecto
         int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
@@ -46,23 +49,20 @@ public class falta extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             timePicker.setHour(currentHour);
             timePicker.setMinute(currentMinute);
-            timePicker.setIs24HourView(false); // Formato de 12 horas (AM/PM)
+            timePicker.setIs24HourView(false); // Formato 12 horas (AM/PM)
         } else {
             timePicker.setCurrentHour(currentHour);
             timePicker.setCurrentMinute(currentMinute);
         }
 
-        // Configurar el selector de fecha
         setupDatePicker();
 
-        // Configurar el botón Siguiente
         Button btnSiguiente = findViewById(R.id.btnSiguiente);
         btnSiguiente.setOnClickListener(v -> {
             Intent intent = new Intent(falta.this, DecomisosAutoridadOtrosActivity.class);
             intent.putExtra("usuario_logueado", getIntent().getStringExtra("usuario_logueado"));
             startActivity(intent);
         });
-        imgEvidencia = findViewById(R.id.imgEvidencia);
 
         imgEvidencia.setOnClickListener(v -> {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -99,6 +99,7 @@ public class falta extends AppCompatActivity {
         SimpleDateFormat sdf = new SimpleDateFormat(dateFormat, Locale.getDefault());
         etFechaDecomiso.setText(sdf.format(calendar.getTime()));
     }
+
     private void abrirCamara() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (intent.resolveActivity(getPackageManager()) != null) {
@@ -109,11 +110,20 @@ public class falta extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK && data != null) {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
-            imgEvidencia.setImageBitmap(imageBitmap);
+
+            // Crear un nuevo ImageView para la foto
+            ImageView nuevaFoto = new ImageView(this);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(200, 200);
+            params.setMargins(8, 0, 8, 0);
+            nuevaFoto.setLayoutParams(params);
+            nuevaFoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            nuevaFoto.setImageBitmap(imageBitmap);
+
+            // Agregar la foto al LinearLayout
+            layoutFotos.addView(nuevaFoto);
         }
     }
 
@@ -129,5 +139,4 @@ public class falta extends AppCompatActivity {
             }
         }
     }
-
 }
