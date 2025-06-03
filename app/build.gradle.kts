@@ -1,3 +1,5 @@
+// app/build.gradle.kts
+
 plugins {
     id("com.android.application")
     kotlin("android") version "1.8.21" // si usas Kotlin
@@ -30,6 +32,22 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+
+    // <<< ¡¡¡ACTUALIZA ESTE BLOQUE!!! >>>
+    packaging {
+        resources {
+            excludes += "META-INF/native-image/reflect-config.json"
+            excludes += "META-INF/native-image/resource-config.json" // <<< AÑADE ESTA LÍNEA
+            excludes += "META-INF/INDEX.LIST"
+            excludes += "META-INF/*.RSA"
+            excludes += "META-INF/*.SF"
+            excludes += "META-INF/*.DSA"
+        }
+    }
+    // <<< FIN DEL BLOQUE ACTUALIZADO >>>
 }
 
 dependencies {
@@ -38,4 +56,9 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.activity:activity:1.8.0")
     implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("com.itextpdf:itext7-core:8.0.4") // iText 7
+
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }

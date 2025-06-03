@@ -30,15 +30,15 @@
         android:layout_marginBottom="24dp" />
 
     <Button
-        android:id="@+id/btnGuardarUbicacion"
+        android:id="@+id/btnGuardarMulta"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Guardar Ubicación"
+        android:text="Guardar Multa"
         android:textColor="#FFFFFF"
         android:backgroundTint="#002D72"
         android:textStyle="bold"
         android:textSize="14sp"
         android:paddingVertical="6dp"
         android:paddingHorizontal="12dp"
-        android:layout_gravity="center_horizontal" />
-</LinearLayout>
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="32dp" /> </LinearLayout>

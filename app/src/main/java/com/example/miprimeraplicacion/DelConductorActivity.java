@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Toast; // Añadir importación
 import androidx.appcompat.app.AppCompatActivity;
 
 public class DelConductorActivity extends AppCompatActivity {
@@ -16,6 +17,9 @@ public class DelConductorActivity extends AppCompatActivity {
     CheckBox claseExtranjera, claseJuvenil, claseMotocicleta, claseParticular, clasePesadaT, clasePesadaL, claseLiviana;
 
     DB_conductores dbConductores;
+
+    // Variable para almacenar el usuario logueado
+    private String usuarioLogueado;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +46,14 @@ public class DelConductorActivity extends AppCompatActivity {
         clasePesadaL = findViewById(R.id.clasePesadaL);
         claseLiviana = findViewById(R.id.claseLiviana);
 
+        // RECIBIR: Obtener el usuario logueado de la actividad anterior
+        usuarioLogueado = getIntent().getStringExtra("usuario_logueado");
+        if (usuarioLogueado == null) {
+            Toast.makeText(this, "Error: Usuario no recibido.", Toast.LENGTH_SHORT).show();
+            finish(); // O manejar este error de alguna forma
+            return;
+        }
+
         // Buscar automáticamente cuando se pierda el foco del campo licencia
         licenciaInput.setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus) {
@@ -49,14 +61,44 @@ public class DelConductorActivity extends AppCompatActivity {
             }
         });
 
-        // Configuración básica del botón
+        // Configuración del botón Siguiente
         Button btnSiguiente = findViewById(R.id.btnSiguiente);
         btnSiguiente.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Navegación simple sin validaciones
+                // Recolectar todos los datos del conductor
+                String licencia = licenciaInput.getText().toString();
+                String apellido1 = apellido1Input.getText().toString();
+                String apellido2 = apellido2Input.getText().toString();
+                String apellido3 = apellido3Input.getText().toString(); // Recoge este valor
+                String nombre1 = nombre1Input.getText().toString();
+                String nombre2 = nombre2Input.getText().toString();
+                String nombre3 = nombre3Input.getText().toString(); // Recoge este valor
+
+                String claseLicencia = "";
+                if (claseExtranjera.isChecked()) claseLicencia = "Extranjera";
+                else if (claseJuvenil.isChecked()) claseLicencia = "Juvenil";
+                else if (claseMotocicleta.isChecked()) claseLicencia = "Motocicleta";
+                else if (claseParticular.isChecked()) claseLicencia = "Particular";
+                else if (clasePesadaT.isChecked()) claseLicencia = "Pesada-T";
+                else if (clasePesadaL.isChecked()) claseLicencia = "Pesada-L";
+                else if (claseLiviana.isChecked()) claseLicencia = "Liviana";
+                else {
+                    Toast.makeText(DelConductorActivity.this, "Por favor, seleccione una clase de licencia.", Toast.LENGTH_SHORT).show();
+                    return; // Evita avanzar si no hay clase seleccionada
+                }
+
+                // PASAR: Crear Intent y adjuntar todos los datos
                 Intent intent = new Intent(DelConductorActivity.this, DelVehiculoActivity.class);
-                intent.putExtra("usuario_logueado", getIntent().getStringExtra("usuario_logueado"));
+                intent.putExtra("usuario_logueado", usuarioLogueado); // Agente
+                intent.putExtra("conductor_licencia", licencia);
+                intent.putExtra("conductor_apellido1", apellido1);
+                intent.putExtra("conductor_apellido2", apellido2);
+                intent.putExtra("conductor_apellido3", apellido3); // Pasa este valor
+                intent.putExtra("conductor_nombre1", nombre1);
+                intent.putExtra("conductor_nombre2", nombre2);
+                intent.putExtra("conductor_nombre3", nombre3); // Pasa este valor
+                intent.putExtra("conductor_clase_licencia", claseLicencia);
                 startActivity(intent);
             }
         });
@@ -64,16 +106,34 @@ public class DelConductorActivity extends AppCompatActivity {
 
     private void buscarConductor(String licencia) {
         Cursor cursor = dbConductores.buscarPorLicencia(licencia);
-        if (cursor.moveToFirst()) {
+        if (cursor != null && cursor.moveToFirst()) { // Añadido null check
             apellido1Input.setText(cursor.getString(cursor.getColumnIndexOrThrow("apellido1")));
             apellido2Input.setText(cursor.getString(cursor.getColumnIndexOrThrow("apellido2")));
+            //apellido3Input.setText(cursor.getString(cursor.getColumnIndexOrThrow("apellido3"))); // Si tu base de datos tiene este campo
             nombre1Input.setText(cursor.getString(cursor.getColumnIndexOrThrow("nombre1")));
             nombre2Input.setText(cursor.getString(cursor.getColumnIndexOrThrow("nombre2")));
+            //nombre3Input.setText(cursor.getString(cursor.getColumnIndexOrThrow("nombre3"))); // Si tu base de datos tiene este campo
 
             String clase = cursor.getString(cursor.getColumnIndexOrThrow("clase"));
             actualizarClase(clase);
+            cursor.close(); // ¡Importante cerrar el cursor!
+        } else {
+            // Limpia los campos si no se encuentra el conductor
+            apellido1Input.setText("");
+            apellido2Input.setText("");
+            apellido3Input.setText("");
+            nombre1Input.setText("");
+            nombre2Input.setText("");
+            nombre3Input.setText("");
+            claseExtranjera.setChecked(false);
+            claseJuvenil.setChecked(false);
+            claseMotocicleta.setChecked(false);
+            claseParticular.setChecked(false);
+            clasePesadaT.setChecked(false);
+            clasePesadaL.setChecked(false);
+            claseLiviana.setChecked(false);
+            Toast.makeText(this, "Conductor no encontrado.", Toast.LENGTH_SHORT).show();
         }
-        cursor.close();
     }
 
     private void actualizarClase(String clase) {

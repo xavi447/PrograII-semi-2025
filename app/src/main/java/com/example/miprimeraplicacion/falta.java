@@ -18,52 +18,172 @@ import android.provider.MediaStore;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+import android.widget.RadioGroup; // <<<< Importar RadioGroup
+import android.widget.RadioButton; // <<<< Importar RadioButton
+
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.io.IOException;
 
 public class falta extends AppCompatActivity {
 
     private EditText etFechaDecomiso;
+    private TimePicker timePickerDecomiso;
     private Calendar calendar = Calendar.getInstance();
     private static final int REQUEST_CAMERA_PERMISSION = 100;
     private static final int REQUEST_IMAGE_CAPTURE = 101;
+    private ArrayList<String> fotosGuardadasPaths = new ArrayList<>();
 
-    private ImageView imgEvidencia; // Este será el botón para abrir cámara
-    private LinearLayout layoutFotos; // Contenedor donde aparecerán las fotos
+    private ImageView imgEvidencia;
+    private LinearLayout layoutFotos;
+
+    // Campos recién identificados en el layout y que deben ser inicializados
+    private EditText etCodigoFalta;       // <<<< Declarado aquí
+    private RadioGroup radioGroupClasificacion; // <<<< Declarado aquí
+
+    // Variables para almacenar todos los datos recibidos de DelVehiculoActivity
+    private String usuarioLogueado;
+    private String conductorLicencia, conductorApellido1, conductorApellido2, conductorApellido3,
+            conductorNombre1, conductorNombre2, conductorNombre3, conductorClaseLicencia;
+    private String vehiculoTipoPlaca, vehiculoNumeroPlaca, vehiculoCodigoRuta, vehiculoClase,
+            vehiculoMarca, vehiculoModelo, vehiculoColor;
+    private boolean vehiculoPlacaExtranjera;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.falta);
 
-        TimePicker timePicker = findViewById(R.id.timePickerDecomiso);
+        // Inicializar vistas del layout
+        timePickerDecomiso = findViewById(R.id.timePickerDecomiso);
         etFechaDecomiso = findViewById(R.id.etFechaDecomiso);
         imgEvidencia = findViewById(R.id.imgEvidencia);
         layoutFotos = findViewById(R.id.layoutFotos);
+
+        // <<<< ¡¡¡AÑADIDO!!! Inicializar etCodigoFalta y radioGroupClasificacion
+        etCodigoFalta = findViewById(R.id.etCodigoFalta);
+        radioGroupClasificacion = findViewById(R.id.radioGroupClasificacion);
+
+        // RECIBIR: Todos los datos del agente, conductor y vehículo
+        usuarioLogueado = getIntent().getStringExtra("usuario_logueado");
+        conductorLicencia = getIntent().getStringExtra("conductor_licencia");
+        conductorApellido1 = getIntent().getStringExtra("conductor_apellido1");
+        conductorApellido2 = getIntent().getStringExtra("conductor_apellido2");
+        conductorApellido3 = getIntent().getStringExtra("conductor_apellido3");
+        conductorNombre1 = getIntent().getStringExtra("conductor_nombre1");
+        conductorNombre2 = getIntent().getStringExtra("conductor_nombre2");
+        conductorNombre3 = getIntent().getStringExtra("conductor_nombre3");
+        conductorClaseLicencia = getIntent().getStringExtra("conductor_clase_licencia");
+
+        vehiculoTipoPlaca = getIntent().getStringExtra("vehiculo_tipo_placa");
+        vehiculoNumeroPlaca = getIntent().getStringExtra("vehiculo_numero_placa");
+        vehiculoCodigoRuta = getIntent().getStringExtra("vehiculo_codigo_ruta");
+        vehiculoPlacaExtranjera = getIntent().getBooleanExtra("vehiculo_placa_extranjera", false);
+        vehiculoClase = getIntent().getStringExtra("vehiculo_clase");
+        vehiculoMarca = getIntent().getStringExtra("vehiculo_marca");
+        vehiculoModelo = getIntent().getStringExtra("vehiculo_modelo");
+        vehiculoColor = getIntent().getStringExtra("vehiculo_color");
+
+        // Opcional: una verificación básica para asegurar que se recibieron los datos principales
+        if (usuarioLogueado == null || conductorLicencia == null || vehiculoNumeroPlaca == null) {
+            Toast.makeText(this, "Error: Datos previos incompletos. Regresando.", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
 
         // Establecer hora actual por defecto
         int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
         int currentMinute = calendar.get(Calendar.MINUTE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            timePicker.setHour(currentHour);
-            timePicker.setMinute(currentMinute);
-            timePicker.setIs24HourView(false); // Formato 12 horas (AM/PM)
+            timePickerDecomiso.setHour(currentHour);
+            timePickerDecomiso.setMinute(currentMinute);
+            // timePickerDecomiso.setIs24HourView(false); // Si quieres 12 horas (AM/PM)
         } else {
-            timePicker.setCurrentHour(currentHour);
-            timePicker.setCurrentMinute(currentMinute);
+            timePickerDecomiso.setCurrentHour(currentHour);
+            timePickerDecomiso.setCurrentMinute(currentMinute);
         }
 
-        setupDatePicker();
+        setupDatePicker(); // Muestra la fecha actual por defecto
 
         Button btnSiguiente = findViewById(R.id.btnSiguiente);
         btnSiguiente.setOnClickListener(v -> {
+            // Recolectar fecha y hora actuales de esta actividad
+            String fecha = etFechaDecomiso.getText().toString();
+            int hour = 0;
+            int minute = 0;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                hour = timePickerDecomiso.getHour();
+                minute = timePickerDecomiso.getMinute();
+            } else {
+                hour = timePickerDecomiso.getCurrentHour();
+                minute = timePickerDecomiso.getCurrentMinute();
+            }
+            String hora = String.format(Locale.getDefault(), "%02d:%02d", hour, minute);
+            String fechaHoraInfraccion = fecha + " " + hora;
+
+            // <<<< Recolectar los datos de Código de Falta y Clasificación
+            String codigoFalta = etCodigoFalta.getText().toString().trim();
+            String clasificacionFalta = "";
+            int selectedRadioButtonId = radioGroupClasificacion.getCheckedRadioButtonId();
+            if (selectedRadioButtonId != -1) {
+                RadioButton selectedRadioButton = findViewById(selectedRadioButtonId);
+                clasificacionFalta = selectedRadioButton.getText().toString();
+            } else {
+                Toast.makeText(this, "Por favor, seleccione una Clasificación para la falta.", Toast.LENGTH_SHORT).show();
+                return; // Evita avanzar si no se selecciona clasificación
+            }
+
+            // Validación básica de campos obligatorios
+            if (codigoFalta.isEmpty() || fecha.isEmpty()) { // Puedes añadir más validaciones aquí
+                Toast.makeText(this, "Por favor, complete el Código de la Falta y la Fecha.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+
+            // PASAR: Crear Intent y adjuntar TODOS los datos acumulados
             Intent intent = new Intent(falta.this, DecomisosAutoridadOtrosActivity.class);
-            intent.putExtra("usuario_logueado", getIntent().getStringExtra("usuario_logueado"));
+
+            // Datos del Agente (recibidos)
+            intent.putExtra("usuario_logueado", usuarioLogueado);
+
+            // Datos del Conductor (recibidos)
+            intent.putExtra("conductor_licencia", conductorLicencia);
+            intent.putExtra("conductor_apellido1", conductorApellido1);
+            intent.putExtra("conductor_apellido2", conductorApellido2);
+            intent.putExtra("conductor_apellido3", conductorApellido3);
+            intent.putExtra("conductor_nombre1", conductorNombre1);
+            intent.putExtra("conductor_nombre2", conductorNombre2);
+            intent.putExtra("conductor_nombre3", conductorNombre3);
+            intent.putExtra("conductor_clase_licencia", conductorClaseLicencia);
+
+            // Datos del Vehículo (recibidos)
+            intent.putExtra("vehiculo_tipo_placa", vehiculoTipoPlaca);
+            intent.putExtra("vehiculo_numero_placa", vehiculoNumeroPlaca);
+            intent.putExtra("vehiculo_codigo_ruta", vehiculoCodigoRuta);
+            intent.putExtra("vehiculo_placa_extranjera", vehiculoPlacaExtranjera);
+            intent.putExtra("vehiculo_clase", vehiculoClase);
+            intent.putExtra("vehiculo_marca", vehiculoMarca);
+            intent.putExtra("vehiculo_modelo", vehiculoModelo);
+            intent.putExtra("vehiculo_color", vehiculoColor);
+
+            // Datos de la Falta (propios de esta actividad)
+            intent.putExtra("fecha_hora_infraccion", fechaHoraInfraccion);
+            intent.putStringArrayListExtra("fotos_evidencia_paths", fotosGuardadasPaths);
+            // <<<< ¡¡¡AÑADIDO!!! Pasar Código de Falta y Clasificación
+            intent.putExtra("falta_codigo", codigoFalta);
+            intent.putExtra("falta_clasificacion", clasificacionFalta);
+
+
             startActivity(intent);
         });
 
+        // Configuración para tomar foto con imgEvidencia
         imgEvidencia.setOnClickListener(v -> {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -92,6 +212,7 @@ public class falta extends AppCompatActivity {
                         calendar.get(Calendar.DAY_OF_MONTH)
                 ).show()
         );
+        updateDateLabel(); // Para que la fecha actual aparezca por defecto al inicio
     }
 
     private void updateDateLabel() {
@@ -104,8 +225,11 @@ public class falta extends AppCompatActivity {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+        } else {
+            Toast.makeText(this, "No se encontró una aplicación de cámara.", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -114,7 +238,11 @@ public class falta extends AppCompatActivity {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
 
-            // Crear un nuevo ImageView para la foto
+            if (imageBitmap == null) {
+                Toast.makeText(this, "Error: La imagen capturada está vacía o es inválida.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             ImageView nuevaFoto = new ImageView(this);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(200, 200);
             params.setMargins(8, 0, 8, 0);
@@ -122,8 +250,34 @@ public class falta extends AppCompatActivity {
             nuevaFoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
             nuevaFoto.setImageBitmap(imageBitmap);
 
-            // Agregar la foto al LinearLayout
-            layoutFotos.addView(nuevaFoto);
+            try {
+                File directory = new File(getFilesDir(), "multa_evidencia");
+                if (!directory.exists()) {
+                    boolean created = directory.mkdirs();
+                    if (!created) {
+                        Toast.makeText(this, "Error crítico: No se pudo crear el directorio de evidencia.", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                }
+
+                String fileName = "IMG_" + System.currentTimeMillis() + ".jpg";
+                File file = new File(directory, fileName);
+
+                FileOutputStream fos = new FileOutputStream(file);
+                imageBitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos);
+                fos.flush();
+                fos.close();
+
+                layoutFotos.addView(nuevaFoto);
+                fotosGuardadasPaths.add(file.getAbsolutePath());
+                Toast.makeText(this, "Foto guardada: " + file.getName(), Toast.LENGTH_SHORT).show();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Error al guardar la foto: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_CANCELED) {
+            Toast.makeText(this, "Captura de imagen cancelada.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -135,7 +289,7 @@ public class falta extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 abrirCamara();
             } else {
-                Toast.makeText(this, "Permiso de cámara denegado", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Permiso de cámara denegado. No se podrá tomar evidencia fotográfica.", Toast.LENGTH_LONG).show();
             }
         }
     }
