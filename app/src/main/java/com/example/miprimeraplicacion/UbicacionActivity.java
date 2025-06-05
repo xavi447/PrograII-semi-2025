@@ -22,19 +22,18 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
-// <<< INICIO DE LAS IMPORTACIONES PARA iTEXT 7 >>>
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.properties.TextAlignment; // Para alinear texto si lo necesitas
-import com.itextpdf.kernel.colors.ColorConstants; // Para colores predefinidos (BLUE, BLACK, etc.)
-import com.itextpdf.kernel.colors.DeviceRgb; // Para definir colores con RGB
-// <<< FIN DE LAS IMPORTACIONES PARA iTEXT 7 >>>
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.kernel.colors.DeviceRgb;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -56,7 +55,6 @@ public class UbicacionActivity extends AppCompatActivity {
     private FusedLocationProviderClient fusedLocationClient;
     private Button btnGuardarMulta;
 
-    // Variables para almacenar todos los datos recibidos
     private String usuarioLogueado;
     private String agenteOni, agentePuesto;
     private String conductorLicencia, conductorApellido1, conductorApellido2, conductorApellido3,
@@ -68,13 +66,22 @@ public class UbicacionActivity extends AppCompatActivity {
     private ArrayList<String> fotosEvidenciaPaths;
     private String multaMonto, multaCategoria;
 
-    // Variables para los datos de ubicación
+    private String faltaCodigo;
+    private String faltaClasificacion;
+    private String observaciones;
+
+    private boolean decomisoVehiculos, decomisoTarjetaCirculacion, decomisoLicencia,
+            decomisoPlacas, decomisoPoliza, decomisoPermisosLinea;
+    private boolean otrosConductorAusente, otrosSeNegoFirmar, otrosAparatoLaser,
+            otrosPruebaAlcotest, otrosDestruyoEsquela, otrosVehiculoRemolcado;
+
     private String ubicacionDepartamento = "Desconocido";
     private String ubicacionMunicipio = "Desconocido";
     private String ubicacionCalle = "Desconocida";
 
-    // Instancia de la base de datos de multas
     private DB_multas dbMultas;
+
+    private static final int REQUEST_SHARE_PDF = 1001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,7 +99,6 @@ public class UbicacionActivity extends AppCompatActivity {
             usuarioLogueado = extras.getString("usuario_logueado");
             agenteOni = extras.getString("agente_oni");
             agentePuesto = extras.getString("agente_puesto");
-
             conductorLicencia = extras.getString("conductor_licencia");
             conductorApellido1 = extras.getString("conductor_apellido1");
             conductorApellido2 = extras.getString("conductor_apellido2");
@@ -101,7 +107,6 @@ public class UbicacionActivity extends AppCompatActivity {
             conductorNombre2 = extras.getString("conductor_nombre2");
             conductorNombre3 = extras.getString("conductor_nombre3");
             conductorClaseLicencia = extras.getString("conductor_clase_licencia");
-
             vehiculoTipoPlaca = extras.getString("vehiculo_tipo_placa");
             vehiculoNumeroPlaca = extras.getString("vehiculo_numero_placa");
             vehiculoCodigoRuta = extras.getString("vehiculo_codigo_ruta");
@@ -110,17 +115,33 @@ public class UbicacionActivity extends AppCompatActivity {
             vehiculoMarca = extras.getString("vehiculo_marca");
             vehiculoModelo = extras.getString("vehiculo_modelo");
             vehiculoColor = extras.getString("vehiculo_color");
-
             fechaHoraInfraccion = extras.getString("fecha_hora_infraccion");
             fotosEvidenciaPaths = extras.getStringArrayList("fotos_evidencia_paths");
-
             multaMonto = extras.getString("multa_monto");
             multaCategoria = extras.getString("multa_categoria");
+            faltaCodigo = extras.getString("falta_codigo");
+            faltaClasificacion = extras.getString("falta_clasificacion");
+            observaciones = extras.getString("observaciones");
+            decomisoVehiculos = extras.getBoolean("decomiso_vehiculos", false);
+            decomisoTarjetaCirculacion = extras.getBoolean("decomiso_tarjeta_circulacion", false);
+            decomisoLicencia = extras.getBoolean("decomiso_licencia", false);
+            decomisoPlacas = extras.getBoolean("decomiso_placas", false);
+            decomisoPoliza = extras.getBoolean("decomiso_poliza", false);
+            decomisoPermisosLinea = extras.getBoolean("decomiso_permisos_linea", false);
+            otrosConductorAusente = extras.getBoolean("otros_conductor_ausente", false);
+            otrosSeNegoFirmar = extras.getBoolean("otros_se_nego_firmar", false);
+            otrosAparatoLaser = extras.getBoolean("otros_aparato_laser", false);
+            otrosPruebaAlcotest = extras.getBoolean("otros_prueba_alcotest", false);
+            otrosDestruyoEsquela = extras.getBoolean("otros_destruyo_esquela", false);
+            otrosVehiculoRemolcado = extras.getBoolean("otros_vehiculo_remolcado", false);
         }
 
-        if (usuarioLogueado == null || conductorLicencia == null || vehiculoNumeroPlaca == null ||
-                fechaHoraInfraccion == null || agenteOni == null || multaMonto == null) {
-            Toast.makeText(this, "Error: Datos previos incompletos en UbicacionActivity. No se puede guardar la multa.", Toast.LENGTH_LONG).show();
+        if (usuarioLogueado == null || agenteOni == null || agentePuesto == null ||
+                conductorLicencia == null || conductorApellido1 == null || conductorNombre1 == null || conductorClaseLicencia == null ||
+                vehiculoTipoPlaca == null || vehiculoNumeroPlaca == null || vehiculoClase == null ||
+                fechaHoraInfraccion == null || multaMonto == null || multaCategoria == null ||
+                faltaCodigo == null || faltaClasificacion == null || observaciones == null) {
+            Toast.makeText(this, "Error crítico: Faltan datos esenciales para guardar la multa. Asegúrese de que todos los campos previos fueron llenados.", Toast.LENGTH_LONG).show();
             finish();
             return;
         }
@@ -169,7 +190,6 @@ public class UbicacionActivity extends AppCompatActivity {
                 ubicacionMunicipio = direccion.getLocality() != null ? direccion.getLocality() : "Desconocido";
                 ubicacionDepartamento = direccion.getAdminArea() != null ? direccion.getAdminArea() : "Desconocido";
 
-
                 String resultado = "Departamento: " + ubicacionDepartamento + "\n"
                         + "Municipio: " + ubicacionMunicipio + "\n"
                         + "Calle: " + ubicacionCalle;
@@ -198,12 +218,11 @@ public class UbicacionActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Permiso de ubicación denegado. No se podrá guardar la ubicación de la multa.", Toast.LENGTH_LONG).show();
             }
-        }
-        else if (requestCode == REQUEST_WRITE_STORAGE) {
+        } else if (requestCode == REQUEST_WRITE_STORAGE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                generatePdf();
+                generateAndSharePdf();
             } else {
-                Toast.makeText(this, "Permiso de almacenamiento denegado. No se puede guardar el PDF de la multa.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Permiso de almacenamiento denegado. No se puede generar o compartir el PDF de la multa.", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -213,7 +232,7 @@ public class UbicacionActivity extends AppCompatActivity {
         if (fotosEvidenciaPaths != null && !fotosEvidenciaPaths.isEmpty()) {
             fotosPathsString = String.join(";", fotosEvidenciaPaths);
         }
-
+        int vehiculoPlacaExtranjeraInt = vehiculoPlacaExtranjera ? 1 : 0;
         long idMulta = dbMultas.insertarMulta(
                 usuarioLogueado,
                 agenteOni,
@@ -229,7 +248,7 @@ public class UbicacionActivity extends AppCompatActivity {
                 vehiculoTipoPlaca,
                 vehiculoNumeroPlaca,
                 vehiculoCodigoRuta,
-                vehiculoPlacaExtranjera ? 1 : 0,
+                vehiculoPlacaExtranjeraInt,
                 vehiculoClase,
                 vehiculoMarca,
                 vehiculoModelo,
@@ -240,186 +259,127 @@ public class UbicacionActivity extends AppCompatActivity {
                 multaCategoria,
                 ubicacionDepartamento,
                 ubicacionMunicipio,
-                ubicacionCalle
+                ubicacionCalle,
+                faltaCodigo,
+                faltaClasificacion,
+                observaciones,
+                decomisoVehiculos,
+                decomisoTarjetaCirculacion,
+                decomisoLicencia,
+                decomisoPlacas,
+                decomisoPoliza,
+                decomisoPermisosLinea,
+                otrosConductorAusente,
+                otrosSeNegoFirmar,
+                otrosAparatoLaser,
+                otrosPruebaAlcotest,
+                otrosDestruyoEsquela,
+                otrosVehiculoRemolcado
         );
-
         if (idMulta != -1) {
             Toast.makeText(this, "Multa guardada exitosamente con ID: " + idMulta, Toast.LENGTH_LONG).show();
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                generatePdf();
-            } else {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this,
-                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_STORAGE);
-                } else {
-                    generatePdf();
-                }
-            }
-
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            finish();
+            generateAndSharePdf();
         } else {
             Toast.makeText(this, "Error al guardar la multa.", Toast.LENGTH_LONG).show();
         }
     }
 
-    private void generatePdf() {
+    private void generateAndSharePdf() {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String pdfFileName = "MULTA_" + vehiculoNumeroPlaca + "_" + timeStamp + ".pdf";
+        String pdfFileName = "MULTA_" + (vehiculoNumeroPlaca != null ? vehiculoNumeroPlaca : "SIN_PLACA") + "_" + timeStamp + ".pdf";
 
-        OutputStream outputStream = null;
         Uri pdfUri = null;
+        File pdfFile = null;
 
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                ContentResolver resolver = getContentResolver();
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, pdfFileName);
-                contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf");
-                contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + File.separator + "MisMultas");
-
-                pdfUri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues);
-                if (pdfUri == null) {
-                    throw new IOException("Failed to create new MediaStore record.");
-                }
-                outputStream = resolver.openOutputStream(pdfUri);
-
-            } else {
-                File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-                File appDir = new File(downloadsDir, "MisMultas");
-                if (!appDir.exists()) {
-                    appDir.mkdirs();
-                }
-                File pdfFile = new File(appDir, pdfFileName);
-                outputStream = new FileOutputStream(pdfFile);
-                pdfUri = Uri.fromFile(pdfFile);
+            File cachePath = new File(getCacheDir(), "shared_pdfs");
+            if (!cachePath.exists()) {
+                cachePath.mkdirs();
             }
+            pdfFile = new File(cachePath, pdfFileName);
+            OutputStream outputStream = new FileOutputStream(pdfFile);
 
-            if (outputStream == null) {
-                Toast.makeText(this, "Error: No se pudo obtener el stream de salida para el PDF.", Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            // --- Creación del documento PDF con iText 7 ---
             PdfWriter writer = new PdfWriter(outputStream);
             PdfDocument pdf = new PdfDocument(writer);
-            Document document = new Document(pdf); // document acepta ahora el PdfDocument
+            Document document = new Document(pdf);
 
-            // --- ESTILO DE FUENTES (usando iText 7 Colors y font.setFontSize) ---
-            // iText 7 usa ColorConstants para colores predefinidos o DeviceRgb para RGB personalizado.
-            // Para cambiar el tamaño y el color, lo aplicas directamente al objeto Paragraph.
-
-            // Azul
-            com.itextpdf.layout.element.Paragraph titleParagraph =
-                    new Paragraph("REPORTE DE MULTA")
-                            .setFontColor(ColorConstants.BLUE)
-                            .setFontSize(18)
-                            .setBold(); // Para negrita
-
-            // Gris Oscuro (puedes usar ColorConstants.DARK_GRAY o DeviceRgb)
             DeviceRgb darkGray = new DeviceRgb(64, 64, 64);
-            com.itextpdf.layout.element.Paragraph sectionParagraph;
 
-            // Negro
-            com.itextpdf.layout.element.Paragraph dataParagraph;
-            com.itextpdf.layout.element.Paragraph smallDataParagraph;
+            document.add(new Paragraph("REPORTE DE MULTA")
+                    .setFontColor(ColorConstants.BLUE)
+                    .setFontSize(18)
+                    .setBold()
+                    .setTextAlignment(TextAlignment.CENTER));
 
-            // --- CONTENIDO DEL PDF ---
-            document.add(titleParagraph.setTextAlignment(TextAlignment.CENTER)); // Centrar el título
             document.add(new Paragraph("Fecha de Generación: " + new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(new Date()))
                     .setFontSize(10)
                     .setFontColor(ColorConstants.BLACK));
             document.add(new Paragraph("\n"));
 
-            // AGENTE
-            sectionParagraph = new Paragraph("--- DATOS DEL AGENTE ---")
+            document.add(new Paragraph("--- DATOS DEL AGENTE ---")
                     .setFontColor(darkGray)
                     .setFontSize(14)
-                    .setBold();
-            document.add(sectionParagraph);
-            dataParagraph = new Paragraph("Usuario Logueado: " + (usuarioLogueado != null ? usuarioLogueado : "N/A"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
-            dataParagraph = new Paragraph("ONI: " + (agenteOni != null ? agenteOni : "N/A"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
-            dataParagraph = new Paragraph("Puesto: " + (agentePuesto != null ? agentePuesto : "N/A"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
+                    .setBold());
+            document.add(new Paragraph("Usuario Logueado: " + (usuarioLogueado != null ? usuarioLogueado : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("ONI: " + (agenteOni != null ? agenteOni : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("Puesto: " + (agentePuesto != null ? agentePuesto : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
             document.add(new Paragraph("\n"));
 
-            // CONDUCTOR
-            sectionParagraph = new Paragraph("--- DATOS DEL CONDUCTOR ---")
+            document.add(new Paragraph("--- DATOS DEL CONDUCTOR ---")
                     .setFontColor(darkGray)
                     .setFontSize(14)
-                    .setBold();
-            document.add(sectionParagraph);
-            dataParagraph = new Paragraph("Licencia: " + (conductorLicencia != null ? conductorLicencia : "N/A"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
-            dataParagraph = new Paragraph("Nombres: " + (conductorNombre1 != null ? conductorNombre1 : "") + " " + (conductorNombre2 != null ? conductorNombre2 : "") + " " + (conductorNombre3 != null ? conductorNombre3 : ""))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
-            dataParagraph = new Paragraph("Apellidos: " + (conductorApellido1 != null ? conductorApellido1 : "") + " " + (conductorApellido2 != null ? conductorApellido2 : "") + " " + (conductorApellido3 != null ? conductorApellido3 : ""))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
-            dataParagraph = new Paragraph("Clase Licencia: " + (conductorClaseLicencia != null ? conductorClaseLicencia : "N/A"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
+                    .setBold());
+            document.add(new Paragraph("Licencia: " + (conductorLicencia != null ? conductorLicencia : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("Nombres: " + (conductorNombre1 != null ? conductorNombre1 : "") + " " + (conductorNombre2 != null ? conductorNombre2 : "") + " " + (conductorNombre3 != null ? conductorNombre3 : ""))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("Apellidos: " + (conductorApellido1 != null ? conductorApellido1 : "") + " " + (conductorApellido2 != null ? conductorApellido2 : "") + " " + (conductorApellido3 != null ? conductorApellido3 : ""))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("Clase Licencia: " + (conductorClaseLicencia != null ? conductorClaseLicencia : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
             document.add(new Paragraph("\n"));
 
-            // VEHÍCULO
-            sectionParagraph = new Paragraph("--- DATOS DEL VEHÍCULO ---")
+            document.add(new Paragraph("--- DATOS DEL VEHÍCULO ---")
                     .setFontColor(darkGray)
                     .setFontSize(14)
-                    .setBold();
-            document.add(sectionParagraph);
-            dataParagraph = new Paragraph("Tipo de Placa: " + (vehiculoTipoPlaca != null ? vehiculoTipoPlaca : "N/A"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
-            dataParagraph = new Paragraph("Número de Placa: " + (vehiculoNumeroPlaca != null ? vehiculoNumeroPlaca : "N/A"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
-            dataParagraph = new Paragraph("Código de Ruta: " + (vehiculoCodigoRuta != null ? vehiculoCodigoRuta : "N/A"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
-            dataParagraph = new Paragraph("Placa Extranjera: " + (vehiculoPlacaExtranjera ? "Sí" : "No"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
-            dataParagraph = new Paragraph("Clase: " + (vehiculoClase != null ? vehiculoClase : "N/A"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
-            dataParagraph = new Paragraph("Marca: " + (vehiculoMarca != null ? vehiculoMarca : "N/A"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
-            dataParagraph = new Paragraph("Modelo: " + (vehiculoModelo != null ? vehiculoModelo : "N/A"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
-            dataParagraph = new Paragraph("Color: " + (vehiculoColor != null ? vehiculoColor : "N/A"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
+                    .setBold());
+            document.add(new Paragraph("Tipo de Placa: " + (vehiculoTipoPlaca != null ? vehiculoTipoPlaca : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("Número de Placa: " + (vehiculoNumeroPlaca != null ? vehiculoNumeroPlaca : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("Código de Ruta: " + (vehiculoCodigoRuta != null ? vehiculoCodigoRuta : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("Placa Extranjera: " + (vehiculoPlacaExtranjera ? "Sí" : "No"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("Clase: " + (vehiculoClase != null ? vehiculoClase : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("Marca: " + (vehiculoMarca != null ? vehiculoMarca : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("Modelo: " + (vehiculoModelo != null ? vehiculoModelo : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("Color: " + (vehiculoColor != null ? vehiculoColor : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
             document.add(new Paragraph("\n"));
 
-            // FALTA
-            sectionParagraph = new Paragraph("--- DATOS DE LA FALTA Y MULTA ---")
+            document.add(new Paragraph("--- DATOS DE LA FALTA Y MULTA ---")
                     .setFontColor(darkGray)
                     .setFontSize(14)
-                    .setBold();
-            document.add(sectionParagraph);
-            dataParagraph = new Paragraph("Fecha y Hora Infracción: " + (fechaHoraInfraccion != null ? fechaHoraInfraccion : "N/A"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
-            dataParagraph = new Paragraph("Monto de la Multa: " + (multaMonto != null ? multaMonto : "N/A"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
-            dataParagraph = new Paragraph("Categoría de la Multa: " + (multaCategoria != null ? multaCategoria : "N/A"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
-
+                    .setBold());
+            document.add(new Paragraph("Fecha y Hora Infracción: " + (fechaHoraInfraccion != null ? fechaHoraInfraccion : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("Código de Falta: " + (faltaCodigo != null ? faltaCodigo : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("Clasificación: " + (faltaClasificacion != null ? faltaClasificacion : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("Observaciones: " + (observaciones != null ? observaciones : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("Monto de la Multa: " + (multaMonto != null ? multaMonto : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("Categoría de la Multa: " + (multaCategoria != null ? multaCategoria : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
 
             if (fotosEvidenciaPaths != null && !fotosEvidenciaPaths.isEmpty()) {
                 document.add(new Paragraph("Rutas de Fotos de Evidencia:")
@@ -437,48 +397,107 @@ public class UbicacionActivity extends AppCompatActivity {
             }
             document.add(new Paragraph("\n"));
 
-            // UBICACIÓN
-            sectionParagraph = new Paragraph("--- UBICACIÓN ---")
+            document.add(new Paragraph("--- DECOMISOS ---")
                     .setFontColor(darkGray)
                     .setFontSize(14)
-                    .setBold();
-            document.add(sectionParagraph);
-            dataParagraph = new Paragraph("Departamento: " + (ubicacionDepartamento != null ? ubicacionDepartamento : "N/A"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
-            dataParagraph = new Paragraph("Municipio: " + (ubicacionMunicipio != null ? ubicacionMunicipio : "N/A"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
-            dataParagraph = new Paragraph("Calle/Dirección: " + (ubicacionCalle != null ? ubicacionCalle : "N/A"))
-                    .setFontSize(10).setFontColor(ColorConstants.BLACK);
-            document.add(dataParagraph);
+                    .setBold());
+            boolean hasDecomisos = false;
+            if (decomisoVehiculos) { document.add(new Paragraph("- Vehículos").setFontSize(10).setFontColor(ColorConstants.BLACK)); hasDecomisos = true; }
+            if (decomisoTarjetaCirculacion) { document.add(new Paragraph("- Tarjeta de Circulación").setFontSize(10).setFontColor(ColorConstants.BLACK)); hasDecomisos = true; }
+            if (decomisoLicencia) { document.add(new Paragraph("- Licencia").setFontSize(10).setFontColor(ColorConstants.BLACK)); hasDecomisos = true; }
+            if (decomisoPlacas) { document.add(new Paragraph("- Placas").setFontSize(10).setFontColor(ColorConstants.BLACK)); hasDecomisos = true; }
+            if (decomisoPoliza) { document.add(new Paragraph("- Póliza").setFontSize(10).setFontColor(ColorConstants.BLACK)); hasDecomisos = true; }
+            if (decomisoPermisosLinea) { document.add(new Paragraph("- Permisos de Línea").setFontSize(10).setFontColor(ColorConstants.BLACK)); hasDecomisos = true; }
+            if (!hasDecomisos) { document.add(new Paragraph("Ninguno").setFontSize(10).setFontColor(ColorConstants.BLACK)); }
             document.add(new Paragraph("\n"));
 
+            document.add(new Paragraph("--- OTROS DETALLES ---")
+                    .setFontColor(darkGray)
+                    .setFontSize(14)
+                    .setBold());
+            boolean hasOtros = false;
+            if (otrosConductorAusente) { document.add(new Paragraph("- Conductor Ausente").setFontSize(10).setFontColor(ColorConstants.BLACK)); hasOtros = true; }
+            if (otrosSeNegoFirmar) { document.add(new Paragraph("- Se Negó a Firmar").setFontSize(10).setFontColor(ColorConstants.BLACK)); hasOtros = true; }
+            if (otrosAparatoLaser) { document.add(new Paragraph("- Uso de Aparato Láser").setFontSize(10).setFontColor(ColorConstants.BLACK)); hasOtros = true; }
+            if (otrosPruebaAlcotest) { document.add(new Paragraph("- Prueba de Alcotest Realizada").setFontSize(10).setFontColor(ColorConstants.BLACK)); hasOtros = true; }
+            if (otrosDestruyoEsquela) { document.add(new Paragraph("- Destruyó Esquela").setFontSize(10).setFontColor(ColorConstants.BLACK)); hasOtros = true; }
+            if (otrosVehiculoRemolcado) { document.add(new Paragraph("- Vehículo Remolcado").setFontSize(10).setFontColor(ColorConstants.BLACK)); hasOtros = true; }
+            if (!hasOtros) { document.add(new Paragraph("Ninguno").setFontSize(10).setFontColor(ColorConstants.BLACK)); }
+            document.add(new Paragraph("\n"));
+
+            document.add(new Paragraph("--- UBICACIÓN ---")
+                    .setFontColor(darkGray)
+                    .setFontSize(14)
+                    .setBold());
+            document.add(new Paragraph("Departamento: " + (ubicacionDepartamento != null ? ubicacionDepartamento : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("Municipio: " + (ubicacionMunicipio != null ? ubicacionMunicipio : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("Calle/Dirección: " + (ubicacionCalle != null ? ubicacionCalle : "N/A"))
+                    .setFontSize(10).setFontColor(ColorConstants.BLACK));
+            document.add(new Paragraph("\n"));
 
             document.close();
-            // Ya no es necesario cerrar outputStream aquí, iText 7 lo gestiona con PdfWriter.close() implícitamente al cerrar document.
+            outputStream.close();
 
-            Toast.makeText(this, "PDF guardado exitosamente en " + (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? "Descargas/MisMultas/" : "su almacenamiento público/MisMultas/") + pdfFileName, Toast.LENGTH_LONG).show();
+            pdfUri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", pdfFile);
 
-            if (pdfUri != null) {
-                abrirPdf(pdfUri);
-            }
+            sharePdf(pdfUri);
 
-        } catch (IOException e) { // Solo IOException, DocumentException ya no es directamente lanzada aquí
+        } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(this, "Error al generar el PDF: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Error al generar o compartir el PDF: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
-    private void abrirPdf(Uri pdfUri) {
+    // --- Métodos MODIFICADOS/AÑADIDOS para compartir y cerrar sesión ---
+
+    private void sharePdf(Uri pdfUri) {
         try {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(pdfUri, "application/pdf");
-            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivity(intent);
+            if (pdfUri == null) {
+                Toast.makeText(this, "Error: No se pudo generar el PDF para compartir.", Toast.LENGTH_LONG).show();
+                redirigirAlLoginYCerrarSesion();
+                return;
+            }
+
+            Intent emailIntent = new Intent(Intent.ACTION_SEND);
+            emailIntent.setType("application/pdf");
+            emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{""});
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Reporte de Multa");
+            emailIntent.putExtra(Intent.EXTRA_TEXT, "Adjunto el reporte de la multa generada.");
+            emailIntent.putExtra(Intent.EXTRA_STREAM, pdfUri);
+            emailIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            startActivityForResult(Intent.createChooser(emailIntent, "Enviar PDF de multa vía..."), REQUEST_SHARE_PDF);
+
         } catch (Exception e) {
-            Toast.makeText(this, "No se encontró una aplicación para abrir PDFs. " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "No se encontró una aplicación para enviar correos o compartir el PDF. " + e.getMessage(), Toast.LENGTH_LONG).show();
             e.printStackTrace();
+            redirigirAlLoginYCerrarSesion();
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_SHARE_PDF) {
+            Toast.makeText(this, "Interacción de compartir PDF finalizada. Cerrando sesión...", Toast.LENGTH_SHORT).show();
+            redirigirAlLoginYCerrarSesion();
+        }
+    }
+
+    private void redirigirAlLoginYCerrarSesion() {
+        Intent intent = new Intent(this, SeleccionLoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    // --- Fin de métodos MODIFICADOS/AÑADIDOS ---
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 }

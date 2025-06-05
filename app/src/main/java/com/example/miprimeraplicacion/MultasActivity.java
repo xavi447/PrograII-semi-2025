@@ -5,19 +5,21 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
-import android.widget.Toast; // <<<< Importar Toast
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import java.util.ArrayList; // <<<< Importar ArrayList
+import java.util.ArrayList;
 import androidx.core.content.ContextCompat;
+import android.widget.RadioButton; // Necesario para obtener el texto del RadioButton
+
 public class MultasActivity extends AppCompatActivity {
 
     private EditText inputMonto;
     private RadioGroup radioGroupCategoria;
-    private Button btnSiguiente;
+    private Button btnSiguiente; // Volvemos a btnSiguiente
 
-    // Variables para almacenar todos los datos recibidos
+    // Variables para almacenar todos los datos recibidos de DecomisosAutoridadOtrosActivity
     private String usuarioLogueado;
-    private String agenteOni, agentePuesto; // Datos del agente confirmados
+    private String agenteOni, agentePuesto;
     private String conductorLicencia, conductorApellido1, conductorApellido2, conductorApellido3,
             conductorNombre1, conductorNombre2, conductorNombre3, conductorClaseLicencia;
     private String vehiculoTipoPlaca, vehiculoNumeroPlaca, vehiculoCodigoRuta, vehiculoClase,
@@ -25,11 +27,25 @@ public class MultasActivity extends AppCompatActivity {
     private boolean vehiculoPlacaExtranjera;
     private String fechaHoraInfraccion;
     private ArrayList<String> fotosEvidenciaPaths;
+    private String faltaCodigo, faltaClasificacion, observaciones;
+
+    // --- NUEVAS VARIABLES PARA RECIBIR DATOS DE DECOMISOS Y OTROS ---
+    private boolean decomisoVehiculos, decomisoTarjetaCirculacion, decomisoLicencia,
+            decomisoPlacas, decomisoPoliza, decomisoPermisosLinea;
+    private boolean otrosConductorAusente, otrosSeNegoFirmar, otrosAparatoLaser,
+            otrosPruebaAlcotest, otrosDestruyoEsquela, otrosVehiculoRemolcado;
+    // -----------------------------------------------------------------
+
+    // Eliminamos la instancia de DB_multas aquí, ya que no se usará para guardar en esta actividad.
+    // private DB_multas dbMultas;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.de_multas); // Asegúrate que coincida con tu XML
+
+        // Eliminamos la inicialización de DB_multas aquí.
+        // dbMultas = new DB_multas(this);
 
         // 1. Obtener referencias de vistas
         inputMonto = findViewById(R.id.inputMonto);
@@ -58,24 +74,48 @@ public class MultasActivity extends AppCompatActivity {
             vehiculoTipoPlaca = extras.getString("vehiculo_tipo_placa");
             vehiculoNumeroPlaca = extras.getString("vehiculo_numero_placa");
             vehiculoCodigoRuta = extras.getString("vehiculo_codigo_ruta");
-            vehiculoPlacaExtranjera = extras.getBoolean("vehiculo_placa_extranjera", false); // Correcto para Bundle
+            vehiculoPlacaExtranjera = extras.getBoolean("vehiculo_placa_extranjera", false);
             vehiculoClase = extras.getString("vehiculo_clase");
             vehiculoMarca = extras.getString("vehiculo_marca");
             vehiculoModelo = extras.getString("vehiculo_modelo");
             vehiculoColor = extras.getString("vehiculo_color");
 
-            // Datos de la Falta
+            // Datos de la Falta (fecha/hora y fotos ya estaban, ahora añadimos los nuevos)
             fechaHoraInfraccion = extras.getString("fecha_hora_infraccion");
             fotosEvidenciaPaths = extras.getStringArrayList("fotos_evidencia_paths");
-        }
+            faltaCodigo = extras.getString("falta_codigo");
+            faltaClasificacion = extras.getString("falta_clasificacion");
+            observaciones = extras.getString("observaciones");
 
-        // Opcional: una verificación básica para asegurar que se recibieron los datos principales
-        if (usuarioLogueado == null || conductorLicencia == null || vehiculoNumeroPlaca == null || fechaHoraInfraccion == null || agenteOni == null) {
-            Toast.makeText(this, "Error: Datos previos incompletos en MultasActivity.", Toast.LENGTH_SHORT).show();
+            // --- RECIBIR LOS NUEVOS DATOS DE DECOMISOS Y OTROS ---
+            decomisoVehiculos = extras.getBoolean("decomiso_vehiculos", false);
+            decomisoTarjetaCirculacion = extras.getBoolean("decomiso_tarjeta_circulacion", false);
+            decomisoLicencia = extras.getBoolean("decomiso_licencia", false);
+            decomisoPlacas = extras.getBoolean("decomiso_placas", false);
+            decomisoPoliza = extras.getBoolean("decomiso_poliza", false);
+            decomisoPermisosLinea = extras.getBoolean("decomiso_permisos_linea", false);
+
+            otrosConductorAusente = extras.getBoolean("otros_conductor_ausente", false);
+            otrosSeNegoFirmar = extras.getBoolean("otros_se_nego_firmar", false);
+            otrosAparatoLaser = extras.getBoolean("otros_aparato_laser", false);
+            otrosPruebaAlcotest = extras.getBoolean("otros_prueba_alcotest", false);
+            otrosDestruyoEsquela = extras.getBoolean("otros_destruyo_esquela", false);
+            otrosVehiculoRemolcado = extras.getBoolean("otros_vehiculo_remolcado", false);
+            // -----------------------------------------------------------------
+
+            // Validación básica: asegura que los datos principales llegaron
+            if (usuarioLogueado == null || conductorLicencia == null || vehiculoNumeroPlaca == null ||
+                    fechaHoraInfraccion == null || agenteOni == null || faltaCodigo == null ||
+                    faltaClasificacion == null || observaciones == null) {
+                Toast.makeText(this, "Error: Datos previos incompletos en MultasActivity. No se puede continuar.", Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
+        } else {
+            Toast.makeText(this, "Error: No se recibieron datos en MultasActivity. No se puede continuar.", Toast.LENGTH_LONG).show();
             finish();
             return;
         }
-
 
         // 2. Configurar listener para cambios en RadioGroup
         radioGroupCategoria.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -103,34 +143,30 @@ public class MultasActivity extends AppCompatActivity {
             if (selectedId == -1) {
                 Toast.makeText(this, "Por favor, seleccione una categoría de multa.", Toast.LENGTH_SHORT).show();
                 return;
-            } else if (selectedId == R.id.radioLeve) {
-                categoriaMulta = "Leve";
-            } else if (selectedId == R.id.radioGrave) {
-                categoriaMulta = "Grave";
-            } else if (selectedId == R.id.radioMuyGrave) {
-                categoriaMulta = "Muy Grave";
-            } else if (selectedId == R.id.radioOtra) {
-                categoriaMulta = "Otra";
+            } else {
+                RadioButton selectedRadioButton = findViewById(selectedId);
+                categoriaMulta = selectedRadioButton.getText().toString(); // Obtener el texto del RadioButton seleccionado
+            }
+
+            if (selectedId == R.id.radioOtra) {
                 if (montoMulta.isEmpty()) {
-                    Toast.makeText(this, "Por favor, ingrese el monto de la multa.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Por favor, ingrese el monto de la multa para la categoría 'Otra'.", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 // Opcional: Validar que el monto sea un número válido si la categoría es "Otra"
                 try {
                     Double.parseDouble(montoMulta);
                 } catch (NumberFormatException e) {
-                    Toast.makeText(this, "Monto de multa inválido.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Monto de multa inválido. Ingrese un valor numérico.", Toast.LENGTH_SHORT).show();
                     return;
                 }
-            }
-
-            if (montoMulta.isEmpty()) { // Esto puede pasar si no se selecciona ninguna y radioOtra tampoco se llena
+            } else if (montoMulta.isEmpty()) { // Validar monto para categorías predefinidas si el EditText está vacío
                 Toast.makeText(this, "El monto de la multa no puede estar vacío.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
 
-            // PASAR: Crear Intent y adjuntar TODOS los datos acumulados
+            // PASAR: Crear Intent y adjuntar TODOS los datos acumulados a UbicacionActivity
             Intent intent = new Intent(MultasActivity.this, UbicacionActivity.class);
 
             // Datos del Agente (recibidos y confirmados aquí)
@@ -158,11 +194,30 @@ public class MultasActivity extends AppCompatActivity {
             intent.putExtra("vehiculo_modelo", vehiculoModelo);
             intent.putExtra("vehiculo_color", vehiculoColor);
 
-            // Datos de la Falta (recibidos)
+            // Datos de la Falta (recibidos de la actividad anterior)
             intent.putExtra("fecha_hora_infraccion", fechaHoraInfraccion);
             intent.putStringArrayListExtra("fotos_evidencia_paths", fotosEvidenciaPaths);
+            intent.putExtra("falta_codigo", faltaCodigo);
+            intent.putExtra("falta_clasificacion", faltaClasificacion);
+            intent.putExtra("observaciones", observaciones);
 
-            // Datos de la Multa (propios de esta actividad)
+            // --- PASAR LOS NUEVOS DATOS DE DECOMISOS Y OTROS A LA SIGUIENTE ACTIVIDAD (UbicacionActivity) ---
+            intent.putExtra("decomiso_vehiculos", decomisoVehiculos);
+            intent.putExtra("decomiso_tarjeta_circulacion", decomisoTarjetaCirculacion);
+            intent.putExtra("decomiso_licencia", decomisoLicencia);
+            intent.putExtra("decomiso_placas", decomisoPlacas);
+            intent.putExtra("decomiso_poliza", decomisoPoliza);
+            intent.putExtra("decomiso_permisos_linea", decomisoPermisosLinea);
+
+            intent.putExtra("otros_conductor_ausente", otrosConductorAusente);
+            intent.putExtra("otros_se_nego_firmar", otrosSeNegoFirmar);
+            intent.putExtra("otros_aparato_laser", otrosAparatoLaser);
+            intent.putExtra("otros_prueba_alcotest", otrosPruebaAlcotest);
+            intent.putExtra("otros_destruyo_esquela", otrosDestruyoEsquela);
+            intent.putExtra("otros_vehiculo_remolcado", otrosVehiculoRemolcado);
+            // --------------------------------------------------------------------------------------------------
+
+            // Datos de la Multa (propios de esta actividad, que se pasarán a UbicacionActivity)
             intent.putExtra("multa_monto", montoMulta);
             intent.putExtra("multa_categoria", categoriaMulta);
 
@@ -174,7 +229,6 @@ public class MultasActivity extends AppCompatActivity {
         editText.setText(monto);
         editText.setFocusable(false);
         editText.setClickable(false);
-        // Usar ContextCompat para colores para compatibilidad con versiones antiguas
         editText.setBackgroundColor(ContextCompat.getColor(this, android.R.color.darker_gray));
     }
 
@@ -183,7 +237,8 @@ public class MultasActivity extends AppCompatActivity {
         editText.setHint("Ingrese monto");
         editText.setFocusableInTouchMode(true);
         editText.setClickable(true);
-        // Asegúrate de que R.drawable.edit_text_bg exista
-        editText.setBackgroundResource(R.drawable.edit_text_bg);
+        // Asegúrate de que R.drawable.edit_text_bg exista y sea un recurso válido para el fondo
+        //editText.setBackgroundResource(R.drawable.edit_text_bg); // Comenta o elimina si no tienes este recurso
+        editText.setBackgroundColor(ContextCompat.getColor(this, android.R.color.white)); // Puedes usar un color blanco o un color por defecto
     }
 }

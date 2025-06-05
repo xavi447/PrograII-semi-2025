@@ -18,8 +18,8 @@ import android.provider.MediaStore;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-import android.widget.RadioGroup; // <<<< Importar RadioGroup
-import android.widget.RadioButton; // <<<< Importar RadioButton
+import android.widget.RadioGroup;
+import android.widget.RadioButton;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -41,9 +41,9 @@ public class falta extends AppCompatActivity {
     private ImageView imgEvidencia;
     private LinearLayout layoutFotos;
 
-    // Campos recién identificados en el layout y que deben ser inicializados
-    private EditText etCodigoFalta;       // <<<< Declarado aquí
-    private RadioGroup radioGroupClasificacion; // <<<< Declarado aquí
+    private EditText etCodigoFalta;
+    private RadioGroup radioGroupClasificacion;
+    private EditText etObservacionesDecomiso; // <<< ¡CORREGIDO! Usando el ID del layout
 
     // Variables para almacenar todos los datos recibidos de DelVehiculoActivity
     private String usuarioLogueado;
@@ -65,9 +65,10 @@ public class falta extends AppCompatActivity {
         imgEvidencia = findViewById(R.id.imgEvidencia);
         layoutFotos = findViewById(R.id.layoutFotos);
 
-        // <<<< ¡¡¡AÑADIDO!!! Inicializar etCodigoFalta y radioGroupClasificacion
         etCodigoFalta = findViewById(R.id.etCodigoFalta);
         radioGroupClasificacion = findViewById(R.id.radioGroupClasificacion);
+        // <<< ¡CORREGIDO! Inicializar con el ID correcto del layout
+        etObservacionesDecomiso = findViewById(R.id.etObservacionesDecomiso);
 
         // RECIBIR: Todos los datos del agente, conductor y vehículo
         usuarioLogueado = getIntent().getStringExtra("usuario_logueado");
@@ -103,13 +104,12 @@ public class falta extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             timePickerDecomiso.setHour(currentHour);
             timePickerDecomiso.setMinute(currentMinute);
-            // timePickerDecomiso.setIs24HourView(false); // Si quieres 12 horas (AM/PM)
         } else {
             timePickerDecomiso.setCurrentHour(currentHour);
             timePickerDecomiso.setCurrentMinute(currentMinute);
         }
 
-        setupDatePicker(); // Muestra la fecha actual por defecto
+        setupDatePicker();
 
         Button btnSiguiente = findViewById(R.id.btnSiguiente);
         btnSiguiente.setOnClickListener(v -> {
@@ -127,7 +127,7 @@ public class falta extends AppCompatActivity {
             String hora = String.format(Locale.getDefault(), "%02d:%02d", hour, minute);
             String fechaHoraInfraccion = fecha + " " + hora;
 
-            // <<<< Recolectar los datos de Código de Falta y Clasificación
+            // Recolectar los datos de Código de Falta y Clasificación
             String codigoFalta = etCodigoFalta.getText().toString().trim();
             String clasificacionFalta = "";
             int selectedRadioButtonId = radioGroupClasificacion.getCheckedRadioButtonId();
@@ -136,12 +136,15 @@ public class falta extends AppCompatActivity {
                 clasificacionFalta = selectedRadioButton.getText().toString();
             } else {
                 Toast.makeText(this, "Por favor, seleccione una Clasificación para la falta.", Toast.LENGTH_SHORT).show();
-                return; // Evita avanzar si no se selecciona clasificación
+                return;
             }
 
+            // <<< ¡CORREGIDO! Recolectar el texto del EditText correcto
+            String observaciones = etObservacionesDecomiso.getText().toString().trim();
+
             // Validación básica de campos obligatorios
-            if (codigoFalta.isEmpty() || fecha.isEmpty()) { // Puedes añadir más validaciones aquí
-                Toast.makeText(this, "Por favor, complete el Código de la Falta y la Fecha.", Toast.LENGTH_SHORT).show();
+            if (codigoFalta.isEmpty() || fecha.isEmpty() || clasificacionFalta.isEmpty()) {
+                Toast.makeText(this, "Por favor, complete el Código de la Falta, la Fecha y seleccione una Clasificación.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -175,10 +178,9 @@ public class falta extends AppCompatActivity {
             // Datos de la Falta (propios de esta actividad)
             intent.putExtra("fecha_hora_infraccion", fechaHoraInfraccion);
             intent.putStringArrayListExtra("fotos_evidencia_paths", fotosGuardadasPaths);
-            // <<<< ¡¡¡AÑADIDO!!! Pasar Código de Falta y Clasificación
             intent.putExtra("falta_codigo", codigoFalta);
             intent.putExtra("falta_clasificacion", clasificacionFalta);
-
+            intent.putExtra("observaciones", observaciones); // <<< ¡CORREGIDO! Pasando las observaciones
 
             startActivity(intent);
         });
@@ -212,7 +214,7 @@ public class falta extends AppCompatActivity {
                         calendar.get(Calendar.DAY_OF_MONTH)
                 ).show()
         );
-        updateDateLabel(); // Para que la fecha actual aparezca por defecto al inicio
+        updateDateLabel();
     }
 
     private void updateDateLabel() {
