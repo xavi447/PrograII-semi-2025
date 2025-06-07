@@ -5,8 +5,19 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log; // Agrega esta importación para Logcat
+
+// IMPORTACIONES DE FIREBASE REALTIME DATABASE (si eliges usarla aquí)
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+// IMPORTACIONES PARA HashMap y Map
+import java.util.HashMap;
+import java.util.Map;
 
 public class DB_multas extends SQLiteOpenHelper {
+
+    private static final String TAG = "DB_multas_SQLite"; // TAG para Logcat
 
     private static final String DATABASE_NAME = "multas_app.db";
     // *** CAMBIO CLAVE 1: INCREMENTAR LA VERSIÓN DE LA BASE DE DATOS ***
@@ -17,9 +28,9 @@ public class DB_multas extends SQLiteOpenHelper {
     // Nombre de la tabla
     private static final String TABLE_MULTAS = "multas";
 
-    // Columnas de la tabla multas (existentes)
+    // Columnas de la tabla multas
     private static final String COLUMN_ID = "id_multa";
-    private static final String COLUMN_FECHA_HORA = "fecha_hora";
+    private static final String COLUMN_FECHA_HORA = "fecha_hora"; // Formato TEXT (timestamp o string)
     private static final String COLUMN_TIPO_INFRACCION = "tipo_infraccion";
     private static final String COLUMN_MONTO = "monto";
     private static final String COLUMN_UBICACION_DEPARTAMENTO = "ubicacion_departamento";
@@ -27,7 +38,7 @@ public class DB_multas extends SQLiteOpenHelper {
     private static final String COLUMN_UBICACION_CALLE = "ubicacion_calle";
     private static final String COLUMN_EVIDENCIA_FOTOS_PATHS = "evidencia_fotos_paths";
 
-    // Datos del Agente
+    // Datos del Agente (referencia o copia de datos importantes)
     private static final String COLUMN_AGENTE_USUARIO = "agente_usuario";
     private static final String COLUMN_AGENTE_ONI = "agente_oni";
     private static final String COLUMN_AGENTE_PUESTO = "agente_puesto";
@@ -52,7 +63,7 @@ public class DB_multas extends SQLiteOpenHelper {
     private static final String COLUMN_VEHICULO_MODELO = "vehiculo_modelo";
     private static final String COLUMN_VEHICULO_COLOR = "vehiculo_color";
 
-    // Columnas para los datos de la Falta (ya existentes de tu código)
+    // Columnas para los datos de la Falta
     private static final String COLUMN_FALTA_CODIGO = "falta_codigo";
     private static final String COLUMN_FALTA_CLASIFICACION = "falta_clasificacion";
     private static final String COLUMN_OBSERVACIONES = "observaciones";
@@ -75,7 +86,8 @@ public class DB_multas extends SQLiteOpenHelper {
 
 
     // Sentencia SQL para crear la tabla de multas (con todas las columnas)
-    private static final String CREATE_TABLE_MULTAS =
+    // Es importante que esta cadena de CREATE TABLE contenga TODAS las columnas definidas arriba.
+    private static final String CREATE_TABLE_MULTAS_SQL =
             "CREATE TABLE " + TABLE_MULTAS + "(" +
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                     COLUMN_FECHA_HORA + " TEXT NOT NULL," +
@@ -107,14 +119,12 @@ public class DB_multas extends SQLiteOpenHelper {
                     COLUMN_FALTA_CODIGO + " TEXT," +
                     COLUMN_FALTA_CLASIFICACION + " TEXT," +
                     COLUMN_OBSERVACIONES + " TEXT," +
-                    // *** NUEVAS COLUMNAS PARA DECOMISOS (Tipo INTEGER para booleanos: 0=false, 1=true) ***
                     COLUMN_DECOMISO_VEHICULOS + " INTEGER DEFAULT 0," +
                     COLUMN_DECOMISO_TARJETA_CIRCULACION + " INTEGER DEFAULT 0," +
                     COLUMN_DECOMISO_LICENCIA + " INTEGER DEFAULT 0," +
                     COLUMN_DECOMISO_PLACAS + " INTEGER DEFAULT 0," +
                     COLUMN_DECOMISO_POLIZA + " INTEGER DEFAULT 0," +
                     COLUMN_DECOMISO_PERMISOS_LINEA + " INTEGER DEFAULT 0," +
-                    // *** NUEVAS COLUMNAS PARA OTROS (Tipo INTEGER para booleanos) ***
                     COLUMN_OTROS_CONDUCTOR_AUSENTE + " INTEGER DEFAULT 0," +
                     COLUMN_OTROS_SE_NEGO_FIRMAR + " INTEGER DEFAULT 0," +
                     COLUMN_OTROS_APARATO_LASER + " INTEGER DEFAULT 0," +
@@ -123,25 +133,42 @@ public class DB_multas extends SQLiteOpenHelper {
                     COLUMN_OTROS_VEHICULO_REMOLCADO + " INTEGER DEFAULT 0" +
                     ")";
 
+    // *** DECLARACIÓN E INICIALIZACIÓN DE FIREBASE REALTIME DATABASE ***
+    // Si decides NO usar Realtime Database en esta clase, ELIMINA estas líneas.
+    private DatabaseReference mDatabase;
+
     public DB_multas(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        // Inicializa la referencia de la DB de Firebase
+        // Esto solo es necesario si mantienes la lógica de Realtime Database aquí.
+        mDatabase = FirebaseDatabase.getInstance().getReference("multas");
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_TABLE_MULTAS);
+        db.execSQL(CREATE_TABLE_MULTAS_SQL); // Usa la constante con el nombre completo
+        Log.d(TAG, "Tabla de multas creada en SQLite.");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Manejo de la migración de la base de datos
-        // Si la versión antigua es menor que la nueva, añadimos las columnas.
-        if (oldVersion < 2) { // Este bloque ya lo tenías para la Falta
+        Log.w(TAG, "Actualizando la base de datos de la versión " + oldVersion + " a " + newVersion + ", lo que destruirá todos los datos antiguos para recrear.");
+        // Una estrategia común para migraciones simples o cuando no te importa perder datos
+        // es simplemente eliminar la tabla y volver a crearla.
+        // ADVERTENCIA: Esto borrará todos los datos existentes. Si necesitas conservar datos,
+        // tendrías que implementar sentencias ALTER TABLE para añadir las columnas una por una.
+        // Dado que has incrementado la versión a 3 y has añadido los ALTER TABLE, vamos a usarlos.
+
+        // Primero, asegurémonos de que las columnas anteriores se hayan añadido si la versión es < 2
+        if (oldVersion < 2) {
+            Log.d(TAG, "Realizando upgrade de DB_multas de versión " + oldVersion + " a 2.");
             db.execSQL("ALTER TABLE " + TABLE_MULTAS + " ADD COLUMN " + COLUMN_FALTA_CODIGO + " TEXT");
             db.execSQL("ALTER TABLE " + TABLE_MULTAS + " ADD COLUMN " + COLUMN_FALTA_CLASIFICACION + " TEXT");
             db.execSQL("ALTER TABLE " + TABLE_MULTAS + " ADD COLUMN " + COLUMN_OBSERVACIONES + " TEXT");
         }
+        // Luego, si la versión antigua es menor que 3, añade las nuevas columnas
         if (oldVersion < 3) { // <<< NUEVO BLOQUE para las columnas de decomisos y otros
+            Log.d(TAG, "Realizando upgrade de DB_multas de versión " + oldVersion + " a 3. Añadiendo nuevas columnas.");
             db.execSQL("ALTER TABLE " + TABLE_MULTAS + " ADD COLUMN " + COLUMN_DECOMISO_VEHICULOS + " INTEGER DEFAULT 0");
             db.execSQL("ALTER TABLE " + TABLE_MULTAS + " ADD COLUMN " + COLUMN_DECOMISO_TARJETA_CIRCULACION + " INTEGER DEFAULT 0");
             db.execSQL("ALTER TABLE " + TABLE_MULTAS + " ADD COLUMN " + COLUMN_DECOMISO_LICENCIA + " INTEGER DEFAULT 0");
@@ -156,6 +183,10 @@ public class DB_multas extends SQLiteOpenHelper {
             db.execSQL("ALTER TABLE " + TABLE_MULTAS + " ADD COLUMN " + COLUMN_OTROS_DESTRUYO_ESQUELA + " INTEGER DEFAULT 0");
             db.execSQL("ALTER TABLE " + TABLE_MULTAS + " ADD COLUMN " + COLUMN_OTROS_VEHICULO_REMOLCADO + " INTEGER DEFAULT 0");
         }
+        // Si hay un salto mayor de versión, o si simplemente quieres reiniciar la tabla si la actualización es compleja
+        // Puedes descomentar las siguientes dos líneas, pero ten en cuenta que BORRARÁ TODOS LOS DATOS.
+        // db.execSQL("DROP TABLE IF EXISTS " + TABLE_MULTAS);
+        // onCreate(db);
     }
 
     /**
@@ -241,11 +272,37 @@ public class DB_multas extends SQLiteOpenHelper {
 
         long id = db.insert(TABLE_MULTAS, null, values);
         db.close();
+
+        // Subir a Firebase después de una inserción exitosa en SQLite
+        if (id != -1) {
+            uploadMultaToFirebase(values);
+        }
+
         return id;
     }
 
     public Cursor obtenerTodasLasMultas() {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.query(TABLE_MULTAS, null, null, null, null, null, COLUMN_ID + " DESC");
+    }
+
+    // Nuevo método para subir una multa a Firebase
+    public void uploadMultaToFirebase(ContentValues multaData) {
+        // Firebase Realtime Database no soporta directamente ContentValues.
+        // Necesitas convertirlo a un Map<String, Object> o a un objeto Java personalizado.
+        Map<String, Object> firebaseMultaData = new HashMap<>();
+        for (String key : multaData.keySet()) {
+            firebaseMultaData.put(key, multaData.get(key));
+        }
+
+        // Usa una clave única para cada multa, por ejemplo, timestamp o ID de SQLite
+        // Para simplificar, usaremos un push() que genera un ID único
+        mDatabase.push().setValue(firebaseMultaData)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Multa subida a Firebase exitosamente.");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error subiendo multa a Firebase: " + e.getMessage(), e); // Incluye la excepción en el log
+                });
     }
 }
