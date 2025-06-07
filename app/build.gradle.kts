@@ -80,4 +80,5 @@ dependencies {
 
     // Dependencia para Firebase Firestore (si también la sigues usando)
     implementation("com.google.firebase:firebase-firestore-ktx")
+
 }
